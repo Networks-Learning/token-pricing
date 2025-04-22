@@ -1,0 +1,15 @@
+models/
+
+env/
+
+outputs/
+
+src/experiment/
+
+src/tokenizers/
+
+src/__pycache__/
+
+data/original/
+data/processed/
+notebooks/playground*
