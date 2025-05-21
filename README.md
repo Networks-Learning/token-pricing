@@ -79,7 +79,7 @@ The script [tokenizations_fixed_plausible.py](src/tokenizations_fixed_plausible.
 To reproduce the figure, run the notebook [FILL IN]().
 
 ### LMSYS experiment
-The script [heuristic_misreporting.py](src/heuristic_misreporting.py) generates the output needed to reproduce Figure 1 in the paper. You can run it in your local python environment or use the Slurm submission script on a cluster, using [script_slurm_heur.sh](scripts/script_slurm_heur.sh) with your particular machine specifications.
+The script [heuristic_misreporting.py](src/heuristic_misreporting.py) generates the output needed to reproduce all figures (except Figure 1). You can run it in your local python environment or use the Slurm submission script on a cluster, using [script_slurm_heur.sh](scripts/script_slurm_heur.sh) with your particular machine specifications.
 To reproduce all the figures, run the notebook [FILL IN]().
 
 
