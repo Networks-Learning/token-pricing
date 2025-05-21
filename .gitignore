@@ -19,4 +19,5 @@ src/experiment/
 src/__pycache__/
 src/tokenizers/
 
+.DS_Store
 
