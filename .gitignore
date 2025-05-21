@@ -5,6 +5,8 @@ data/processed
 
 env/
 
+figures/dp/
+
 models/
 
 notebooks/playground*

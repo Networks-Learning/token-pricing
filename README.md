@@ -80,7 +80,7 @@ To reproduce the figure, run the notebook [FILL IN]().
 
 ### LMSYS experiment
 The script [heuristic_misreporting.py](src/heuristic_misreporting.py) generates the output needed to reproduce Figure 1 in the paper. You can run it in your local python environment or use the Slurm submission script on a cluster, using [script_slurm_heur.sh](scripts/script_slurm_heur.sh) with your particular machine specifications.
-To reproduce the all figures, run the notebook [FILL IN]().
+To reproduce all the figures, run the notebook [FILL IN]().
 
 
 ## Contact & attribution
