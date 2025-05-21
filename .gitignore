@@ -14,7 +14,7 @@ models/
 notebooks/playground*
 
 
-outputs/slurm_log/
+outputs/slurm_logs/
 outputs/old_outputs/
 
 scripts/script_slurm_heur_copy.sh
@@ -32,3 +32,8 @@ src/heuristic_top_p_sets_old.py
 
 .DS_Store
 *.pkl
+*.out
+*.err
+
+
+
