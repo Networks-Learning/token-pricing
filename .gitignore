@@ -14,6 +14,7 @@ outputs/
 
 scripts/script_slurm_heur_copy.sh
 scripts/script_slurm_lmsys_copy.sh
+scripts/script_slurm_heur_new.sh
 
 src/experiment/
 src/__pycache__/
