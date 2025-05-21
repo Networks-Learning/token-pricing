@@ -20,22 +20,28 @@ import re
 import ssl
 
 
-#os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Or "true"
+
+
 def generate_sentences(min_len, max_len, number):
     """
-    Generates sequences within a range of characters from the book Moby-Dick by Herman Melville
+    Downloads the text of "Moby Dick" from Project Gutenberg, tokenizes it into sentences,
+    filters sentences based on length and the absence of forbidden characters, and returns
+    a specified number of randomly selected clean sentences.
+    Args:
+        min_len (int): Minimum length (in characters) of sentences to include.
+        max_len (int): Maximum length (in characters) of sentences to include.
+        number (int): Number of sentences to return.
+    Returns:
+        List[str]: A list of randomly selected, cleaned sentences from "Moby Dick" that
+                   meet the specified length and character constraints.
     """
     
-    # Set custom path for NLTK data
-    nltk_data_path = "/NL/token-pricing/work/src"
-    os.makedirs(nltk_data_path, exist_ok=True)  # Ensure the directory exists
-    nltk.data.path.append(nltk_data_path)
+ 
+ 
+    
 
-    # Download punkt to the specified path
-    nltk.download("punkt", download_dir=nltk_data_path)
-
-    # Verify that the path is set correctly
-    print("NLTK data paths:", nltk.data.path)
+    # Download punkt 
+    nltk.download("punkt")
 
     # Bypass SSL verification
     ssl_context = ssl._create_unverified_context()
@@ -50,8 +56,8 @@ def generate_sentences(min_len, max_len, number):
     text = text[start_idx:end_idx]
 
     # Tokenize into sentences
-    nltk.download("punkt", download_dir=nltk_data_path)
-    nltk.download('punkt_tab', download_dir=nltk_data_path)
+    nltk.download("punkt")
+    nltk.download('punkt_tab')
 
     sentences = sent_tokenize(text)
     
@@ -79,7 +85,25 @@ def generate_sentences(min_len, max_len, number):
 
 
 def find_tokenizations(sentence, tokenizer, memo=None, encode=False, max_length=10):
-    """Recursive function to find all possible tokenizations with fewer than max_length tokens."""
+    """
+    Finds all possible tokenizations of a given sentence using a specified tokenizer.
+    This function recursively explores all valid ways to split the input sentence into substrings,
+    such that each substring is recognized as a single token by the tokenizer.
+    Args:
+        sentence (str): The input sentence to tokenize.
+        tokenizer: A tokenizer object with an `encode` method that converts strings to token IDs.
+        memo (dict, optional): A dictionary for memoization to cache results for substrings. Defaults to None.
+        encode (bool, optional): If True, returns token IDs instead of string tokens. Defaults to False.
+        max_length (int, optional): Maximum allowed length for a tokenization (in tokens or token IDs). Defaults to 10.
+    Returns:
+        list: A list of possible tokenizations. Each tokenization is a list of strings (if encode=False)
+              or a list of token IDs (if encode=True), with length less than `max_length`.
+    """
+
+    
+    
+    
+    
     if memo is None:
         memo = {}
     if sentence in memo:
@@ -94,13 +118,14 @@ def find_tokenizations(sentence, tokenizer, memo=None, encode=False, max_length=
         encoded_prefix = tokenizer.encode(prefix, add_special_tokens=False)
         
         if len(encoded_prefix) == 1:  # Only consider valid tokenizations
-            for rest_tokenization in find_tokenizations(rest, tokenizer, memo, max_length=max_length):
+            for rest_tokenization in find_tokenizations(rest, tokenizer, memo, max_length=max_length):#Recursive call to find_tokenizations
+                
                 candidate = [prefix] + rest_tokenization
                 if encode:
                     encoded_candidate = list(itertools.chain.from_iterable(
                         tokenizer.encode(string, add_special_tokens=False) for string in candidate
                     ))
-                    if len(encoded_candidate) < max_length:
+                    if len(encoded_candidate) < max_length: #Check if the total length is less than max_length
                         tokenizations.append(encoded_candidate)
                 else:
                     if len(candidate) < max_length:
@@ -110,7 +135,20 @@ def find_tokenizations(sentence, tokenizer, memo=None, encode=False, max_length=
     return tokenizations
 
 def compute_tokenization_probability(tokenization, prompt, tokenizer, model):
-    """Computes the probability of a tokenization by multiplying the probabilities of each token."""
+    """
+    Computes the probability of a given tokenization sequence following a prompt using a language model.
+    Args:
+        tokenization (List[int]): The list of token IDs representing the tokenization to evaluate.
+        prompt (str): The input prompt string preceding the tokenization.
+        tokenizer: The tokenizer object used to encode the prompt and interpret token IDs.
+        model: The language model (e.g., a HuggingFace transformer) that outputs logits for token predictions.
+    Returns:
+        float: The probability of the tokenization sequence occurring after the prompt, as predicted by the model.
+    Note:
+        - The function assumes that the model outputs logits in the shape (batch_size, sequence_length, vocab_size).
+        - Probabilities are computed by multiplying the model's predicted probabilities for each token in the tokenization sequence, conditioned on the prompt and previous tokens.
+    """
+
     
     
     tokenization_ids=torch.tensor(tokenization).unsqueeze(0) # Convert tokenization to tensor
@@ -120,7 +158,9 @@ def compute_tokenization_probability(tokenization, prompt, tokenizer, model):
     
 
     # Concatenate the prompt and tokenization ids    
-    input_ids = torch.cat((prompt_ids, tokenization_ids), dim=1) # Concatenate prompt and tokenization ids
+    input_ids = torch.cat((prompt_ids, tokenization_ids), dim=1) 
+    
+    
     # Get model's predictions (logits) for each token
     with torch.no_grad():
         outputs = model(input_ids)
@@ -137,78 +177,75 @@ def compute_tokenization_probability(tokenization, prompt, tokenizer, model):
         
         # Get the probability of the token in the model's output
         token_probability = probabilities[0, prompt_ids.shape[1]+idx-1, token_id].item()
-        #token_logit = logits[0, prompt_ids.shape[1]+idx, token_id].item()
 
         tokenization_probability *= token_probability
 
     return tokenization_probability 
 
 
-
-if __name__ == "__main__":
+def verify_sampling_conditions(tokens, prompt_length, top_k=None, top_p=None, model=None, tokenizer=None, temp = 1.0):
+    """
+    Verifies whether each generated token after the prompt in a sequence satisfies the specified top-k and/or top-p sampling conditions.
+    Args:
+        tokens (list[int]): List of token IDs representing the input sequence (prompt + generated tokens).
+        prompt_length (int): The length of the prompt (number of tokens before generation starts).
+        top_k (int, optional): If specified, checks if each generated token is within the top-k most probable tokens at its position.
+        top_p (float, optional): If specified, checks if each generated token is within the smallest set of tokens whose cumulative probability exceeds top_p at its position.
+        model (torch.nn.Module): The language model used to compute logits for the tokens.
+        tokenizer (transformers.PreTrainedTokenizer, optional): Tokenizer corresponding to the model (not used in this function, but included for interface consistency).
+        temp (float, optional): Temperature parameter for scaling logits before softmax. Default is 1.0.
+    Returns:
+        dict: A dictionary with the following keys:
+            - "all_top_k_met" (bool or None): True if all generated tokens are within the top-k set at their positions, False otherwise, or None if top_k is not specified.
+            - "all_top_p_met" (bool or None): True if all generated tokens are within the top-p set at their positions, False otherwise, or None if top_p is not specified.
+    """
     
-    custom_cache_dir = "../models"
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--num_seq', type=int, required=True)
-    parser.add_argument('--min_seq_len', type=int, required=True)
-    parser.add_argument('--max_seq_len', type=int, required=True)
-    parser.add_argument('--max_tok_len', type=int, required=True)
-
-    # Parse the arguments
-    args = parser.parse_args()
-
-    # Load tokenizer and model
-    model_name = "meta-llama/Llama-3.2-1B-Instruct"
-    print("Loading model...")
-    random.seed(8) 
-    tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=custom_cache_dir)
-    model = AutoModelForCausalLM.from_pretrained(model_name, 
-                                                torch_dtype=torch.float16, 
-                                                cache_dir=custom_cache_dir)
-    print("Model loaded...")
-
-
-    sentences = generate_sentences(args.min_seq_len, args.max_seq_len , args.num_seq)
-    sentences_lengths = []
-    probability_overcost = []
-
-    for i in range(len(sentences)):
-        
-        text = sentences[i]
-        print(f"Starting sentence {i}..........", text)
-        tokenizations = find_tokenizations(text, tokenizer, encode=True, max_length=args.max_tok_len)
-        print("Number of tokenizations for the sentence", len(tokenizations))
-        if len(tokenizations) == 0:
-            continue
-        sentences_lengths.append(len(text))
-        tok_lengths = []
-        tok_probs = []
-        for idx, tokenization in enumerate(tokenizations):
-        # Compute the probability of this tokenization
-            tok_lengths.append(len(tokenization))
-            prob = compute_tokenization_probability(tokenization, " ", tokenizer, model)
-            
-            tok_probs.append(prob)
-            
-                            
-            readable_tokenization = ' '.join(tokenizer.decode([token_id], skip_special_tokens=True) for token_id in tokenization)
-            print(f"Tokenization {idx + 1}: {readable_tokenization} | Probability/score: {prob:.15f}")
-        
-        tok_probs = [prob / np.sum(tok_probs) for prob in tok_probs]
-        lengths_sorted, probs_sorted = sort_tensors(torch.tensor(tok_lengths, dtype=torch.float64), torch.tensor(tok_probs, dtype=torch.float64))
-        print("lengths sorted", lengths_sorted)
-        print("probs sorted", probs_sorted)
-        number_canonical_tok = len(tokenizer.encode(text, add_special_tokens=False))
-        #If the baseline is the canonical tok:
-        #overcost_prob = 1 - probs_sorted[(lengths_sorted == number_canonical_tok).nonzero(as_tuple=True)[0][0].item()]
-        
-        #If the baseline is the shortest tokenization, since the sort_tensors already sorts them
-        overcost_prob = 1 - probs_sorted[0]
-        
-        probability_overcost.append(overcost_prob)
-        print(f"Finishing sentence {i}.... Overcost probability: {overcost_prob:.15f}")
-        
-        
     
-    np.save(f"sentences_lengths_baseline_short_8.npy", sentences_lengths)
-    np.save(f"probability_overcost_baseline_short_8.npy", probability_overcost)
+    
+    
+    # Convert tokens to tensor and run the model
+    input_ids = torch.tensor([tokens]).to("cuda")
+    with torch.no_grad():
+        outputs = model(input_ids)
+    
+    logits = outputs.logits
+
+    all_top_k_met = True
+    all_top_p_met = True
+
+    # Evaluate only on tokens after the prompt
+    for i in range(prompt_length, len(tokens)):  # Start from tokens after the prompt
+        previous_logits = logits[0, i - 1]  # Logits for predicting the current token
+        probabilities = torch.softmax(previous_logits / temp, dim=-1)  # Convert logits to probabilities
+
+        # Get current token
+        
+        
+        current_token = tokens[i]
+        token_probability = probabilities[current_token].item()
+
+        # Check top-k condition
+        top_k_condition = False
+        if top_k is not None:
+            top_k_indices = torch.topk(probabilities, k=top_k).indices
+            top_k_condition = current_token in top_k_indices.tolist()
+            all_top_k_met = all_top_k_met and top_k_condition  # Update overall status
+
+        # Check top-p condition
+        top_p_condition = False
+        if top_p is not None:
+            sorted_probs, sorted_indices = torch.sort(probabilities, descending=True)
+            cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+            top_p_indices = sorted_indices[cumulative_probs <= top_p]
+            # Include the first token that pushes cumulative probability over top_p
+            if len(top_p_indices) < len(sorted_probs):
+                top_p_indices = torch.cat([top_p_indices, sorted_indices[len(top_p_indices):len(top_p_indices) + 1]])
+            top_p_condition = current_token in top_p_indices.tolist()
+            all_top_p_met = all_top_p_met and top_p_condition  # Update overall status
+
+
+
+    return {
+        "all_top_k_met": all_top_k_met if top_k is not None else None,
+        "all_top_p_met": all_top_p_met if top_p is not None else None,
+    }

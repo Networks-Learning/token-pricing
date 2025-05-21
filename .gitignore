@@ -1,15 +1,22 @@
-models/
+
+data/original
+data/processed
+
 
 env/
 
+models/
+
+notebooks/playground*
+
+
 outputs/
 
-src/experiment/
+scripts/script_slurm_heur_copy.sh
+scripts/script_slurm_lmsys_copy.sh
 
+src/experiment/
+src/__pycache__/
 src/tokenizers/
 
-src/__pycache__/
 
-data/original/
-data/processed/
-notebooks/playground*
