@@ -72,7 +72,7 @@ Our experiments use LLMs from the Llama, Gemma and Mistral families, which are "
 You can request to access it at: [https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct), [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it) and [https://huggingface.co/mistralai/Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410).
 Once you have access, you can download any model in the Llama, Gemma and Mistral families.
 Then, before running the scripts you need to authenticate with your Hugging Face account by running `huggingface-cli` login in the terminal.
-Each model should be downloaded to the [models](models/) folder the first time it is called from a script.
+Each model should be downloaded to the `models/` folder.
 
 ### Fixed string experiment
 The script [tokenizations_fixed_plausible.py](src/tokenizations_fixed_plausible.py) generates the output needed to reproduce Figure 1 in the paper. It returns for a given output string (and prompt) the number of top-p/k plausible tokenizations.
