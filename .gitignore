@@ -18,6 +18,11 @@ scripts/script_slurm_lmsys_copy.sh
 src/experiment/
 src/__pycache__/
 src/tokenizers/
+src/find_plaussible_tok_multi_old.py
+src/find_plaussible_tok_old.py
+src/heuristic_misreporting_old.py
+src/heuristic_misreporting_original.py
+src/heuristic_top_p_sets_old.py
 
 .DS_Store
 
