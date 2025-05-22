@@ -12,7 +12,7 @@ figures/dp
 models/
 
 notebooks/playground*
-notebooks/plots_heur_old.ipynb
+notebooks/plots_heu_old.ipynb
 
 
 outputs/slurm_logs/
