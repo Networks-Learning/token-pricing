@@ -35,5 +35,6 @@ src/heuristic_top_p_sets_old.py
 *.out
 *.err
 
+README_sup.md
 
 

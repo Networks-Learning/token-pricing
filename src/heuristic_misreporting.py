@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
    
     #Save a dictionary with the tokenizations and the sampling conditions
-    with open(f"../outputs/heur/heuristic_model_{model_str}_T_{args.temperature}_numseq_{args.num_seq}_p_{top_p}_k_{top_k}_prompt_id{args.prompts[0][0:8]}.pkl", "wb") as f:
+    with open(f"../outputs/heur/heuristic_model_{model_str}_T_{args.temperature}_p_{top_p}_k_{top_k}_prompt_id{args.prompts[0][0:8]}.pkl", "wb") as f:
         pickle.dump({"total_outputs" : total_outputs, "top_p_count":top_p_count, "top_k_count": top_k_count, "generated_outputs" : generated_outputs}, f)
     
     

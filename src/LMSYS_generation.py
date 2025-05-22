@@ -139,5 +139,5 @@ if __name__ == "__main__":
         results.append({"prompt": prompt, "output": outputs})
 
     # Save results to a pickle file
-    with open(f"../outputs/heur/factual_model{model_str}_p{args.p}_k{args.k}_numseq{args.num_seq}_numprompts{len(args.prompts)}_maxoutlen{args.max_output_len}_temp{args.temperature}_id{args.prompts[0][0:8]}.pkl", 'wb') as f:
+    with open(f"../outputs/heur/factual_model{model_str}_p{args.p}_k{args.k}_numprompts{len(args.prompts)}_maxoutlen{args.max_output_len}_temp{args.temperature}_id{args.prompts[0][0:8]}.pkl", 'wb') as f:
         pickle.dump(results, f)
