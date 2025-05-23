@@ -87,11 +87,11 @@ Each model should be downloaded to the `models/` folder.
 
 ### Fixed string experiment
 The script [tokenizations_fixed_plausible.py](src/tokenizations_fixed_plausible.py) generates the output needed to reproduce Figure 1 in the paper. It returns for a given output string (and prompt) the number of top-p/k plausible tokenizations.
-To reproduce the figure, run the notebook [FILL IN]().
+To reproduce the figure, run the notebook [plots_fixed.ipynb](notebooks/plots_fixed.ipynb).
 
 ### LMSYS experiment
 The script [heuristic_misreporting.py](src/heuristic_misreporting.py) generates the output needed to reproduce all figures (except Figure 1). You can run it in your local python environment or use the Slurm submission script on a cluster, using [script_slurm_heur.sh](scripts/script_slurm_heur.sh) with your particular machine specifications. Using [script_slurm_heur.sh](scripts/script_slurm_heur.sh) to run the scripts automatically uses the LMSYS prompts in the file [LMSYS.txt](data/LMSYS.txt). You can use the flags ``--model`` to set a specific model, such as ``meta-llama/Llama-3.2-1B-Instruct``, the flag ``--temperature`` to set the temperature, ``--p`` to set top-p parameter, ``--prompts`` to use a list of string as prompts and ``splits`` to select how many iterations of the heuristic should be used.
-To reproduce all the figures, run the notebook [FILL IN]().
+To reproduce all the figures, run the notebook [plots_heur.ipynb](notebooks/plots_heur.ipynb).
 
 
 ## Contact & attribution
