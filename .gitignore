@@ -13,6 +13,8 @@ models/
 
 notebooks/playground*
 notebooks/plots_heu_old.ipynb
+notebooks/plots_heur_new.ipynb
+
 
 
 outputs/slurm_logs/
