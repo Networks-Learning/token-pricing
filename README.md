@@ -1,6 +1,6 @@
 # Is Your LLM Overcharging You? Tokenization, Transparency, and Incentives
 
-This repository contains the code for the paper ["Is Your LLM Overcharging You? Tokenization, Transparency, and Incentives"]()
+This repository contains the code for the paper ["Is Your LLM Overcharging You? Tokenization, Transparency, and Incentives"](https://arxiv.org/abs/2505.21627)
 by Ander Artola Velasco, Stratis Tsirtsis, Nastaran Okati and Manuel Gomez-Rodriguez.
 
 
