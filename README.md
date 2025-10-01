@@ -100,4 +100,14 @@ In case you have questions about the code, you identify potential bugs or you wo
 
 If you use parts of the code in this repository for your own research, please consider citing:
 
-
+```
+@misc{velasco2025llmoverchargingyoutokenization,
+      title={Is Your LLM Overcharging You? Tokenization, Transparency, and Incentives}, 
+      author={Ander Artola Velasco and Stratis Tsirtsis and Nastaran Okati and Manuel Gomez-Rodriguez},
+      year={2025},
+      eprint={2505.21627},
+      archivePrefix={arXiv},
+      primaryClass={cs.GT},
+      url={https://arxiv.org/abs/2505.21627}, 
+}
+```
