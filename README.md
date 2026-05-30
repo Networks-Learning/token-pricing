@@ -118,11 +118,6 @@ Our experiments use LLMs from the Llama, Gemma and Mistral families. These are g
 Once you have access, authenticate with `huggingface-cli login` and the scripts will cache the model weights under `models/` (which is excluded from the repository via [.gitignore](.gitignore)).
 
 
-### Fixed-string experiment
-
-The script [tokenizations_fixed_plausible.py](src/tokenizations_fixed_plausible.py) produces the data behind Figure 1: for a given output string and prompt, it returns the number of top-p / top-k plausible tokenizations.
-
-
 ### LMSYS heuristic-misreporting experiment
 
 The main heuristic-misreporting experiment runs [heuristic_misreporting.py](src/heuristic_misreporting.py). It can be invoked locally or via the cluster template [script_slurm_heur.sh](scripts/script_slurm_heur.sh) (which reads prompts from [data/LMSYS.txt](data/LMSYS.txt)). Key flags:
