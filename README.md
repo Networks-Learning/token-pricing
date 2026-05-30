@@ -20,6 +20,15 @@ pip install -r requirements.txt
 ```
 
 
+All the experiments were performed using Python 3.11.2. In order to create a virtual environment and install the project dependencies you can run the following commands:
+
+
+```bash
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+```
+
 ## Repository structure
 
 ```
@@ -155,3 +164,5 @@ If you use parts of the code in this repository for your own research, please co
       url={https://arxiv.org/abs/2505.21627},
 }
 ```
+
+
