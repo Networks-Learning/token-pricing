@@ -44,7 +44,6 @@ pip install -r requirements.txt
 ├── outputs
 │   ├── cpt              (JSON results from LMSYS_generation.py)
 │   ├── energy_outputs   (JSON results from energy.py)
-│   ├── fixed_string     (JSON results from tokenizations_fixed_plausible.py)
 │   └── heuristic_new    (JSON results from heuristic_misreporting.py)
 ├── scripts
 │   ├── pkl_to_json.py
@@ -73,10 +72,9 @@ pip install -r requirements.txt
   - [energy_profit_plots.ipynb](notebooks/energy_profit_plots.ipynb) — per-call energy demo, per-model energy statistics, and the profit / utility plots that combine energy ratios with heuristic-misreporting results.
   - [process_ds.ipynb](notebooks/process_ds.ipynb) — builds the LMSYS prompt sets used by the other notebooks.
   - [appendix_example.ipynb](notebooks/appendix_example.ipynb) — generates the worked examples in Appendix C.2 of the paper.
-- `outputs` contains intermediate files produced by the experiment scripts and consumed by the notebooks. All four subdirectories ship `.json` snapshots so the notebooks can be re-executed from a fresh clone:
+- `outputs` contains intermediate files produced by the experiment scripts and consumed by the notebooks. Each subdirectory ships `.json` snapshots so the notebooks can be re-executed from a fresh clone:
   - `cpt` — generation outputs from `LMSYS_generation.py`.
   - `energy_outputs` — GPU energy results from `energy.py`.
-  - `fixed_string` — plausibility counts from `tokenizations_fixed_plausible.py`.
   - `heuristic_new` — plausibility counts from `heuristic_misreporting.py`.
 - `scripts` contains SLURM submission templates and a small utility:
   - [script_slurm_heur.sh](scripts/script_slurm_heur.sh) — runs `heuristic_misreporting.py` on the LMSYS prompts.
@@ -98,8 +96,8 @@ pip install -r requirements.txt
 ### Reproducing intermediate outputs
 
 `.pkl` files are excluded from the repository via [.gitignore](.gitignore).
-The four `outputs/` subdirectories (`cpt`, `energy_outputs`,
-`fixed_string`, `heuristic_new`) ship `.json` snapshots so the
+The `outputs/` subdirectories (`cpt`, `energy_outputs`, `heuristic_new`)
+ship `.json` snapshots so the
 corresponding notebooks can be re-executed from a fresh clone. To
 regenerate any of them from scratch, run the relevant script in `src/`
 (or its SLURM submission template) and convert the resulting pickles to
