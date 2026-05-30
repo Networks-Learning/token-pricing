@@ -1,30 +1,30 @@
-import torch
-import numpy as np
-from tokenizations import find_tokenizations
+"""
+tokenizations_fixed_plausible.py
+Enumerates all tokenizations (up to a length cap) of a fixed string and,
+for each, checks whether every token would be a valid sample under the
+given top-p or top-k criterion conditioned on a prompt. Results are
+pickled to ``<repo>/outputs/fixed/``.
+
+Key functions:
+- ``verify_sampling_conditions`` (from ``tokenizations``): checks top-k
+  and top-p sampling conditions for each token in a sequence.
+- ``process_tokenization``: wrapper that runs the verification for one
+  candidate tokenization.
+
+Command-line arguments:
+- ``--p``: top-p threshold for nucleus sampling (optional).
+- ``--k``: top-k threshold for sampling (optional).
+- ``--prompt``: prompt string preceding the target string.
+- ``--string``: target string to tokenize and evaluate.
+- ``--model``: HuggingFace model name or path.
+"""
+
+import os
+from tokenizations import find_tokenizations, verify_sampling_conditions
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import argparse
 import pickle
 from concurrent.futures import ThreadPoolExecutor
-from tokenizations import verify_sampling_conditions
-
-
-
-
-"""
-This script finds all tokenizations of a given string and returns the tokenizations that are plausbile (i.e., that satisfy top-p and/or top-k sampling conditions) following a prompt.
-
-Key functions:
-- `verify_sampling_conditions`: Checks top-k and top-p sampling conditions for each token in a sequence.
-- `process_tokenization`: Wrapper to process a single tokenization and verify sampling conditions.
-Command-line arguments:
-- `--p`: (Optional) Top-p threshold for nucleus sampling.
-- `--k`: (Optional) Top-k threshold for sampling.
-- `--prompt`: (Optional) Prompt string to use before generation.
-- `--string`: (Optional) Target string to tokenize and evaluate.
-- `--model`: (Optional) Model name or path to use.
-Outputs:
-- A pickle file containing plausibility results for each tokenization of the target string.
-"""
 
 
 
@@ -60,7 +60,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     
-    cache_dir = "../models"
+    # Resolve the model cache directory relative to this script: <repo>/models
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    work_dir = os.path.dirname(script_dir)
+    cache_dir = os.path.join(work_dir, "models")
+
     model_name = args.model
     prompt = args.prompt
     string = args.string
@@ -84,6 +88,11 @@ if __name__ == "__main__":
         for future in futures:
             plaussibility.append(future.result())
     
-    with open(f"../outputs/fixed/plaussibility_p{args.p}_k{args.k}_string_{string}.pkl", 'wb') as f:
+    output_dir = os.path.join(work_dir, "outputs", "fixed")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(
+        output_dir, f"plaussibility_p{args.p}_k{args.k}_string_{string}.pkl"
+    )
+    with open(output_path, 'wb') as f:
         pickle.dump(plaussibility, f)
     print("Script finished.")

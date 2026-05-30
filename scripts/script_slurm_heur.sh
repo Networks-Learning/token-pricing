@@ -48,7 +48,7 @@ for ((job_index=0; job_index<TOTAL_JOBS; job_index++)); do
 #SBATCH --time=30:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=h100,a100
+#SBATCH --partition=h200,h100
 #SBATCH --gres gpu:1            # set 1 GPUs per job
 #SBATCH --mem=40G
 #SBATCH -o ${LOG_DIR}/simulation_%j.out
@@ -59,7 +59,7 @@ cd ${SRC_DIR}
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-python -u heuristic_misreporting.py --prompts ${prompts} --p 0.90 --temperature 1.45 --num_seq 3 --model google/gemma-3-1b-it
+python -u heuristic_misreporting.py --prompts ${prompts} --p 0.90 --temperature 1.45 --model google/gemma-3-1b-it
 EOF
 
 done

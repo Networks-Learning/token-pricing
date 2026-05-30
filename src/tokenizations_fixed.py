@@ -1,51 +1,38 @@
+"""
+tokenizations_fixed.py
+Enumerates all tokenizations (up to a length cap) of a fixed text under
+a tokenizer, then for each one computes the language model's conditional
+probability of producing that tokenization after a given prompt.
 
+Normalizes the probabilities, pickles both the tokenizations and the
+normalized probabilities to ``<repo>/outputs/fixed/``, and reports
+whether the most-probable tokenization is also among the shortest.
+"""
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
-import itertools
-import math
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
-import re
-from utils import sort_tensors
 from tokenizations import find_tokenizations, compute_tokenization_probability
 import pickle
 import argparse
 
-
-"""
-This script computes and analyzes all possible tokenizations of a given text using a specified language model and tokenizer, and evaluates the probability of each tokenization given a prompt.
-Functionality:
-- Parses command-line arguments for prompt, text, and model name.
-- Loads the specified tokenizer and causal language model, using a custom cache directory.
-- Finds all possible tokenizations of the input text (up to a specified maximum length).
-- For each tokenization:
-    - Computes its probability given the prompt using the loaded model.
-    - Prints the tokenization in human-readable form along with its probability.
-- Normalizes the probabilities to obtain conditional probabilities.
-- Saves the list of tokenizations and their probabilities to pickle files.
-- Identifies the shortest tokenizations and checks if the most probable tokenization is among the shortest.
-"""
-
 if __name__ == "__main__":
     
-    #Parse the prompt and text using argparse
+    # Parse the prompt, text, and model name
     parser = argparse.ArgumentParser(description="Tokenization and probability computation")
     parser.add_argument("--prompt", type=str, required=True, default="Inference in causality is ", help="The prompt to use")
     parser.add_argument("--text", type=str, required=True, default="causal inference", help="The text to tokenize")
-    args = parser.parse_args()
     parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.2-1B-Instruct", help="The model name to use")
-    
+    args = parser.parse_args()
+
     prompt = args.prompt
     text = args.text
     model_name = args.model_name
 
-    print("Initilizing script...")
-    
-    #Get the diretory of models cache
+    print("Initializing script...")
+
+    # Resolve the model cache directory relative to this script: <repo>/models
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     work_dir = os.path.dirname(script_dir)
@@ -82,10 +69,13 @@ if __name__ == "__main__":
 
     list_prob = [prob / np.sum(list_prob) for prob in list_prob]  # Normalize the probabilities to obtain conditional probabilities
 
-    with open(f"../outputs/fixed/tokenizations_fixed_{text}.pkl", "wb") as f:
+    output_dir = os.path.join(work_dir, "outputs", "fixed")
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(os.path.join(output_dir, f"tokenizations_fixed_{text}.pkl"), "wb") as f:
         pickle.dump(tokenizations, f)
-    
-    with open(f"../outputs/fixed/probs_fixed_{text}.pkl", "wb") as f:
+
+    with open(os.path.join(output_dir, f"probs_fixed_{text}.pkl"), "wb") as f:
         pickle.dump(list_prob, f)
 
 

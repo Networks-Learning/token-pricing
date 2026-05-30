@@ -1,11 +1,20 @@
-from datasets import load_from_disk 
 import os
 import argparse
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import random
-from utils import optimal_tokenization
 import pickle
+
+
+# Map from HuggingFace model id to the short tag used in result filenames.
+MODEL_STR = {
+    "meta-llama/Llama-3.2-1B-Instruct": "Llama-3.2-1B-Instruct",
+    "mistralai/Ministral-8B-Instruct-2410": "Ministral-8B-Instruct-2410",
+    "meta-llama/Llama-3.2-3B-Instruct": "Llama-3.2-3B-Instruct",
+    "meta-llama/Llama-3.1-8B-Instruct": "Meta-Llama-3.1-8B-Instruct",
+    "google/gemma-3-4b-it": "Gemma-3-4b-it",
+    "google/gemma-3-1b-it": "Gemma-3-1b-it",
+}
 
 
 """
@@ -48,29 +57,22 @@ if __name__ == "__main__":
     parser.add_argument('--k', type=int, required=False)
     parser.add_argument('--max_output_len', type=int, required=False, default=200)
     parser.add_argument('--temperature', type=float, required=False, default=1.3)
+    parser.add_argument('--language', type=str, required=False, default="english")
+
 
 
     # Parse the arguments
     args = parser.parse_args()
-    
-    model_cache = "../models"
-    model_name = args.model
+    language = args.language
     temperature = args.temperature
-   
-    
-    
-    if model_name== "meta-llama/Llama-3.2-1B-Instruct":
-        model_str="Llama-3.2-1B-Instruct"
-    if model_name== "mistralai/Ministral-8B-Instruct-2410":
-        model_str="Ministral-8B-Instruct-2410"
-    if model_name== "meta-llama/Llama-3.2-3B-Instruct":
-        model_str="Llama-3.2-3B-Instruct"
-    if model_name== "meta-llama/Llama-3.1-8B-Instruct":
-        model_str="Meta-Llama-3.1-8B-Instruct"
-    if model_name== "google/gemma-3-4b-it":
-        model_str="Gemma-3-4b-it"
-    if model_name== "google/gemma-3-1b-it":
-        model_str="Gemma-3-1b-it"
+    model_name = args.model
+
+    # Resolve the model cache directory relative to this script: <repo>/models
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    work_dir = os.path.dirname(script_dir)
+    model_cache = os.path.join(work_dir, "models")
+
+    model_str = MODEL_STR.get(model_name, model_name.split("/")[-1])
     
     if args.p is not None:
         top_p = args.p
@@ -83,24 +85,61 @@ if __name__ == "__main__":
     
     #Define the available device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
+    print(f"Using device: {device}")
     #Load model and tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
         
     model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=model_cache).to(device)
    
     results = []
+    # Set the random seed
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
     
     # Iterate over prompts
-    for prompt_idx, prompt in enumerate(args.prompts):
+    for prompt_idx, prompt_str in enumerate(args.prompts):
         
         print("Prompt index: ", prompt_idx)
-        # Tokenize the input prompt
+
+        messages_en = [
+        {"role": "system", "content": "You are a helpful assistant. Write extremely long and verbose sentences. Answer in English."},
+        {"role": "user", "content": prompt_str}
+        ]
+        messages_esp = [
+        {"role": "system", "content": "You are a helpful assistant. Write extremely long and verbose sentences. Answer in Spanish."},
+        {"role": "user", "content": prompt_str}
+        ]
+        messages_ru = [
+        {"role": "system", "content": "You are a helpful assistant. Write extremely long and verbose sentences. Answer in Russian."},
+        {"role": "user", "content": prompt_str}
+        ]
+        messages_ch = [
+        {"role": "system", "content": "You are a helpful assistant. Write extremely long and verbose sentences. Answer in Chinese."},
+        {"role": "user", "content": prompt_str}
+        ]
+        
+        if language == "english":
+            messages = messages_en
+        elif language == "spanish":
+            messages = messages_esp
+        elif language == "russian":
+            messages = messages_ru
+        elif language == "chinese":
+            messages = messages_ch
+        else:
+            raise ValueError("Unsupported language. Choose from: english, spanish, russian, chinese.")
+        
+        prompt = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,              # return as string
+            add_generation_prompt=True
+        )
+        
+        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)        
+        
+        
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
         
-        # Set the random seed
-        random.seed(args.seed)
-        torch.manual_seed(args.seed)
         
         outputs = []
         
@@ -111,7 +150,7 @@ if __name__ == "__main__":
             
             if top_p is not None:
                 output = model.generate(
-                    input_ids,
+                    input_ids=input_ids,
                     do_sample=True,
                     max_new_tokens=max_length,
                     top_p=top_p,
@@ -120,7 +159,7 @@ if __name__ == "__main__":
                 )
             elif top_k is not None:
                 output = model.generate(
-                    input_ids,
+                    input_ids=input_ids,
                     do_sample=True,
                     max_new_tokens=max_length,
                     top_k=top_k,
@@ -139,5 +178,11 @@ if __name__ == "__main__":
         results.append({"prompt": prompt, "output": outputs})
 
     # Save results to a pickle file
-    with open(f"../outputs/heur/factual_model{model_str}_p{args.p}_k{args.k}_numprompts{len(args.prompts)}_maxoutlen{args.max_output_len}_temp{args.temperature}_id{args.prompts[0][0:8]}.pkl", 'wb') as f:
+    output_dir = os.path.join(work_dir, "outputs", "cpt")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(
+        output_dir,
+        f"factual_model{model_str}_lan{language}_p{args.p}_k{args.k}_numprompts{len(args.prompts)}_maxoutlen{args.max_output_len}_temp{args.temperature}_id{args.prompts[0][0:8]}.pkl",
+    )
+    with open(output_path, 'wb') as f:
         pickle.dump(results, f)

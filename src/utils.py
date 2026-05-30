@@ -1,8 +1,17 @@
-#This file contains utility functions for tokenization, plotting, and other helper functions. 
+"""
+utils.py
+Shared utilities used across the project:
+
+- Plotting helpers (``get_fig_dim``, ``latexify``) for producing
+  LaTeX-friendly matplotlib figures at fixed widths.
+- Tokenizer helpers: ``is_in_voc`` (vocabulary lookup),
+  ``optimal_tokenization`` / ``optimal_token_count`` (shortest
+  tokenization of a string under a tokenizer's vocab via DP).
+- ``sort_tensors``: group-by-and-sum over two parallel 1-D tensors.
+"""
 
 import matplotlib.pyplot as plt
 import matplotlib
-import numpy as np
 from transformers import AutoTokenizer
 import torch
 

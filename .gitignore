@@ -1,29 +1,45 @@
 
-data/original
-data/processed
+data/original/
+data/processed/
 
 
 env/
 
-figures/dp/
-figures/dp
 
 
-models/
+models/*
 
-notebooks/playground*
+
+
+
 notebooks/plots_heu_old.ipynb
-notebooks/plots_heur_new.ipynb
+notebooks/plots_heur.ipynb
+notebooks/plots_fixed.ipynb
+notebooks/plots_heur_new_seq4.ipynb
+notebooks/talk_ex.ipynb
+notebooks/plots_margin.ipynb
+notebooks/length_variability.ipynb
 
 
 
-outputs/slurm_logs/
-outputs/old_outputs/
+
+
+outputs/audit_faithfull
+outputs/audit_heuristic
+outputs/fixed_string
 outputs/heuristic_new/old
+outputs/heuristic_spanish
+outputs/old_outputs/
+outputs/slurm_logs/
+
+
+
 
 scripts/script_slurm_heur_copy.sh
 scripts/script_slurm_lmsys_copy.sh
 scripts/script_slurm_heur_new.sh
+
+
 
 src/experiment/
 src/__pycache__/
@@ -33,6 +49,13 @@ src/find_plaussible_tok_old.py
 src/heuristic_misreporting_old.py
 src/heuristic_misreporting_original.py
 src/heuristic_top_p_sets_old.py
+src/length_variants.py
+src/length_variants_deb.py
+src/length_variants_deb_opt.py
+src/length_variants_deb_opt_poi.py
+
+
+
 
 .DS_Store
 *.pkl

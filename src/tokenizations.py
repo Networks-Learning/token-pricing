@@ -1,23 +1,24 @@
+"""
+tokenizations.py
+Helpers for enumerating alternative tokenizations of a string under a
+given tokenizer, computing the probability a language model assigns to
+each tokenization conditioned on a prompt, and verifying whether each
+token in a generated sequence satisfies a top-k or top-p sampling
+condition.
 
+Also includes ``generate_sentences``, which downloads "Moby Dick" from
+Project Gutenberg and returns a random sample of clean sentences within a
+length window — used to build evaluation sets.
+"""
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import itertools
-import math
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-import pandas as pd
-import os
-from utils import sort_tensors
 import nltk
 import random
-from nltk.tokenize import sent_tokenize
-from urllib.request import urlopen
-import itertools
-import argparse
 import re
 import ssl
+from nltk.tokenize import sent_tokenize
+from urllib.request import urlopen
 
 
 
@@ -40,10 +41,11 @@ def generate_sentences(min_len, max_len, number):
  
     
 
-    # Download punkt 
+    # Download nltk sentence tokenizer data
     nltk.download("punkt")
+    nltk.download("punkt_tab")
 
-    # Bypass SSL verification
+    # Bypass SSL verification for the Project Gutenberg download
     ssl_context = ssl._create_unverified_context()
 
     # Download Moby Dick text
@@ -54,10 +56,6 @@ def generate_sentences(min_len, max_len, number):
     start_idx = text.find("Call me Ishmael.")  # First sentence of Moby Dick
     end_idx = text.rfind("THE END")
     text = text[start_idx:end_idx]
-
-    # Tokenize into sentences
-    nltk.download("punkt")
-    nltk.download('punkt_tab')
 
     sentences = sent_tokenize(text)
     
